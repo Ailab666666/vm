@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: anti-fraud
+   labels:
+     name: anti-fraud
+---     
+apiVersion: v1
+kind: Service
+metadata:
+  name: java
+  namespace: anti-fraud
+  labels: 
+    name: java
+spec:
+  type: NodePort
+  ports:
+  - port: 8070
+    protocol: TCP
+    targetPort: 8070
+    name: http
+    nodePort: 30807
+  - port: 9070
+    protocol: TCP
+    targetPort: 9070
+    name: socket
+    nodePort: 30907
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+    name: test
+    nodePort: 30980 
+  selector:
+    name: java
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: java
+  namespace: anti-fraud
+  labels:
+    name: java
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels: 
+        name: java
+    spec:
+      containers:
+      - name: java
+        image: nginx
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8070
+        - containerPort: 9070
+        - containerPort: 80
+---        
+apiVersion: v1
+kind: Service
+metadata:
+  name: python
+  namespace: anti-fraud
+  labels: 
+    name: python
+spec:
+  type: NodePort
+  ports:
+  - port: 6070
+    protocol: TCP
+    targetPort: 6070
+    name: socket
+    nodePort: 30607
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+    name: test
+    nodePort: 30981    
+  selector:
+    name: python
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: python
+  namespace: anti-fraud
+  labels:
+    name: python
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels: 
+        name: python
+    spec:
+      containers:
+      - name: python
+        image: nginx
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6070
+        - containerPort: 80
